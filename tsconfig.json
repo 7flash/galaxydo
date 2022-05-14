@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2021"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
+    "paths": {
+      "@src/*": ["./src/*"],
+      "@convex/*": ["./convex/*"],
+    }
+  },
+  "include": ["src", "./convex"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
