@@ -9,6 +9,7 @@ import type getGalaxiesHistory from "./getGalaxiesHistory";
 import type getMyGalaxies from "./getMyGalaxies";
 import type getProposalStats from "./getProposalStats";
 import type getProposedGalaxies from "./getProposedGalaxies";
+import type getProposerUsers from "./getProposerUsers";
 import type getUserCurrentProposal from "./getUserCurrentProposal";
 import type userCreateGalaxy from "./userCreateGalaxy";
 import type userDenyProposal from "./userDenyProposal";
@@ -51,6 +52,7 @@ export type ConvexAPI = {
     getMyGalaxies: ClientQuery<typeof getMyGalaxies>;
     getProposalStats: ClientQuery<typeof getProposalStats>;
     getProposedGalaxies: ClientQuery<typeof getProposedGalaxies>;
+    getProposerUsers: ClientQuery<typeof getProposerUsers>;
     getUserCurrentProposal: ClientQuery<typeof getUserCurrentProposal>;
   };
   mutations: {

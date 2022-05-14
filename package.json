@@ -12,6 +12,7 @@
     "deploy": "vercel deploy"
   },
   "dependencies": {
+    "@headlessui/react": "^1.6.1",
     "@vercel/node": "^1.15.0",
     "autoprefixer": "^10.4.5",
     "convex-dev": "^0.1.1",

@@ -1,6 +1,7 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@headlessui/react': ^1.6.1
   '@preact/preset-vite': ^2.1.5
   '@vercel/node': ^1.15.0
   autoprefixer: ^10.4.5
@@ -19,6 +20,7 @@ specifiers:
   wouter-preact: ^2.8.0-alpha.2
 
 dependencies:
+  '@headlessui/react': 1.6.1
   '@vercel/node': 1.15.0
   autoprefixer: 10.4.5_postcss@8.4.13
   convex-dev: 0.1.1
@@ -595,6 +597,14 @@ packages:
       '@ethersproject/logger': 5.6.0
       '@ethersproject/properties': 5.6.0
       '@ethersproject/strings': 5.6.0
+    dev: false
+
+  /@headlessui/react/1.6.1:
+    resolution: {integrity: sha512-gMd6uIs1U4Oz718Z5gFoV0o/vD43/4zvbyiJN9Dt7PK9Ubxn+TmJwTmYwyNJc5KxxU1t0CmgTNgwZX9+4NjCnQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: ^16 || ^17 || ^18
+      react-dom: ^16 || ^17 || ^18
     dev: false
 
   /@jridgewell/gen-mapping/0.1.1:

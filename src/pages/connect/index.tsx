@@ -63,7 +63,7 @@ export default function ConnectPage() {
                 <h2>Metamask Signing.. Confirm in popup..</h2> :
                 <div className="flex flex-col">
                     <Link className="underline" href={`/connect/signDevice`}>Sign this Device</Link>
-                    <Link className="underline" href={`/connect/signMetamask`}>Sign with Metamask</Link>                
+                    {/* <Link className="underline" href={`/connect/signMetamask`}>Sign with Metamask</Link>                 */}
                 </div>
         }
     </div>

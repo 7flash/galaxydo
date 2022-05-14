@@ -21,5 +21,27 @@ export default mutation(async (pussy, authSignature: string) => {
         pussy.db.delete(proposal._id);
     }
 
+    // then create new proposal each for himself again..
+
+    const accounts = await pussy.db.table("accounts").collect();
+    const galaxies = await pussy.db.table("galaxies").collect();
+
+    for (const account of accounts) {
+        let alreadyChosen = false;
+
+        for (const galaxy of galaxies) {
+            if (galaxy.name === account.name) {
+                alreadyChosen = true;
+            }
+        }
+
+        if (!alreadyChosen) {
+            pussy.db.insert("proposals", {
+                name: account.name,
+                account: account._id,
+            });
+        }
+    }
+
     return galaxyId;
 });
