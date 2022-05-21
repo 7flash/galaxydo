@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "convexup": "pnpx convex codegen && pnpx convex push",
-    "deploy": "vercel deploy -A vercel.prod.json"
+    "deploy": "vercel deploy -A vercel.prod.json --prod"
   },
   "dependencies": {
     "@vercel/node": "^1.15.0",

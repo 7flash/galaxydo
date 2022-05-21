@@ -1,62 +1,41 @@
 import { useState, useEffect, useErrorBoundary } from 'preact/hooks';
-// import { useLocation } from 'wouter-preact';
 
+import config from '@convex/config';
 import { useQuery, useMutation } from '@convex/_generated';
-import Input from './shared/Input';
 import { Link, useLocation } from 'wouter-preact';
-import RoomRow from './pages/dashboard/account/roomRow';
+import Input from './shared/Input';
 import Select from './shared/Select';
-
-// import useBus from "use-bus";
-
-// import ConnectPage from './pages/connect';
-// import DashboardPage from './pages/dashboard';
-// import ErrorBoundary from './shared/ErrorBoundary';
-// import TestPage from './pages/test';
+import { numberToWord } from './shared/helpers';
 
 export function App() {
-  // const [location, setLocation] = useLocation();
-  // const [isAuthorized, setIsAuthorized] = useState(false);
-
-  // useEffect(() => {
-  //   if (location.startsWith("/fractals")) {
-  //     // proceed to fractals page - ignore authorization
-  //   } else if (location.startsWith("/test")) {
-  //     // setLocation('/test');
-  //   } else if (isAuthorized && location.startsWith("/connect")) {
-  //     setLocation('/dashboard');
-  //   } else if (!isAuthorized && !location.startsWith("/connect")) {
-  //     setLocation('/connect');
-  //   }
-  // }, [isAuthorized, location]);
+  const [location, setLocation] = useLocation();
 
   const [error, resetError] = useErrorBoundary(
-    error => console.error(error),
+    (error) => {
+      console.error(error)
+      setLocation("/");
+    }
   );
-
-  const [location, setLocation] = useLocation();
 
   const [userId, setUserId] = useState("");
 
   const user = useQuery('getUser', userId);
   const fractalRooms = useQuery('getFractalRooms', userId);
+  const fractalVoters = useQuery('getFractalVoters', userId);
+  const voteOptions = useQuery('getVoteOptions', userId);
+  const consensusNumber = useQuery('getConsensusNumber', userId);
+  const fractalRanking = useQuery('getFractalRanking', userId);
 
   const userSaveAccount = useMutation("userSaveAccount");
   const userSaveRoom = useMutation("userSaveRoom");
-  // const userSaveRoom = useMutation("userSaveRoom");
+  const userSaveVote = useMutation("userSaveVote");
+  const userConfirmVote = useMutation("userConfirmVote");
 
   useEffect(() => {
     if (window.localStorage.getItem('userId')) {
       setUserId(window.localStorage.getItem('userId') || "");
-    } // otherwise register user when changing name..
+    }
   }, []);
-
-  // useEffect(() => {
-  //   if (user && user._id && user._id !== userId) {
-  //     window.localStorage.setItem("userId", userId);
-  //     setUserId()
-  //   }
-  // }, [user]);
 
   useEffect(() => {
     console.log("location", location);
@@ -65,7 +44,7 @@ export function App() {
       const param = location.split('/')[2];
       if (param) {
         const effectAccount = async (value: string) => {
-          const response = await userSaveAccount(userId, value);
+          const response = await userSaveAccount(userId, decodeURIComponent(value));
           if (response) {
             const newUserId = response.toString();
             window.localStorage.setItem("userId", newUserId);
@@ -82,11 +61,29 @@ export function App() {
         userSaveRoom(userId, decodeURIComponent(param));
         setLocation('/');
       }
+    } else if (location.startsWith('/vote')) {
+      const param = location.split('/')[2];
+      if (param) {
+        userSaveVote(userId, decodeURIComponent(param));
+        setLocation('/');
+      }
+    } else if (location.startsWith('/confirm')) {
+      userConfirmVote(userId);
+      setLocation('/');
+    } else if (location.startsWith('/logout')) {
+      window.localStorage.setItem('userId', '');
+      setUserId('');
+      setLocation('/');
     }
   }, [location]);
 
   return <div className="flex flex-col h-full font-mono text-white p-4">
-    <h2 className="text-xl">Fractal Genesis, May 21th</h2>
+    <div className="flex flex-row">
+      <h2 className="text-xl">{config.fractalName}</h2>
+      {
+        userId && <Link className="text-sm ml-2 underline" href="/logout">Logout</Link>
+      }
+    </div>
     <div className="bg-gray-700 flex flex-row p-2 mt-2">
       <h2 className="mr-2">Account name</h2>
       {
@@ -95,7 +92,10 @@ export function App() {
       {
         !location.startsWith('/account') && user != null && <div className="flex flex-row">
           <div className="mx-4 bg-gray-600 px-2 text-lg rounded">{user.name}</div>
-          <Link className="underline text-sm" href="/account">Edit</Link>
+          {
+            !user.hasConfirmed &&
+            <Link className="underline text-sm" href="/account">Edit</Link>
+          }
         </div>
       }
       {
@@ -111,70 +111,137 @@ export function App() {
       }
     </div>
     <div className="bg-gray-700 flex flex-row p-2 mt-2">
-      <h2 className="mr-4">Party</h2>
+      <h2 className="mr-4">Fractal room</h2>
       {
         !location.startsWith('/room') && user && <div className="flex flex-row">
           <div className="mx-4 bg-gray-600 px-2 text-lg rounded">
             {user.room ? <span className="">{user.room}</span> : <div className="w-28"></div>}
           </div>
           {
-            user.room && user.room != 'Unassigned' &&
-              <Link className="underline" href="/room">Change</Link>
+            user.hasVoted && !user.hasConfirmed &&
+            <Link className="underline text-sm" href="/room">Change</Link>
           }
           {
-            (!user.room || user.room == 'Unassigned') &&
-              <Link className="underline text-xl" href="/room">Select</Link>
+            !user.hasConfirmed && !user.hasVoted &&
+            <Link className="underline text-xl" href="/room">Choose</Link>
+          }
+          {
+            user.hasConfirmed &&
+            <span className="text-sm">locked</span>
           }
         </div>
       }
       {
-        location.startsWith('/room') && user && <div className="">
-          <Select default={user.room} options={fractalRooms} href="/room" />
+        location.startsWith('/room') && user && fractalRooms && <div className="">
+          <Select default={user.room} options={fractalRooms.map(r => r.name)} href="/room" />
           <Link className="underline text-sm ml-2" href="/">Cancel</Link>
         </div>
       }
     </div>
-    {/* <Input value={user.account} onChange={() => {}} onSubmit={onSubmitAccount} />
-    <h2 className="">Room</h2>
-    <Input value={user.room} onChange={() => {}} onSubmit={onSubmitRoom} />
-    <h2 className="">Consensys</h2>
-    <div>
-      <div>first votes for second</div>
-      <div className="">third votes for second</div>
-    </div>
-    <h2 className="">Ranking</h2>
-    <div className="">
-      <h2 className="">berliangor can receive 2 reputation (Confirm)</h2>
-      <div className="">receives 1 reputation</div>
-      <div className="">berliangor chosen first (6 reputation)</div>
-      <div className="">another chosen second (5 reputation)</div>
-      <div className="">someone can be chosen third (Finalize)</div>
-    </div> */}
-  </div>
-
-  // return <TestPage />
-
-  return <div className="flex flex-col h-full font-mono text-white p-4">
     {
-      error && <div className="flex flex-col items-center justify-center">
-        <h1>Error</h1>
-        <pre>{error.message}</pre>
-        <button onClick={resetError}>Reset</button>
+      (!(fractalRanking && fractalVoters && fractalRanking.length == fractalVoters.length)) &&
+      <div>
+        <div className="flex flex-row mt-2">
+          <h2 className="text-xl">Consensus</h2>
+          {
+            user && consensusNumber && <div className="flex flex-row text-sm ml-2">
+              <span className="">{consensusNumber.consensusReached}</span>
+              <span className="px-1">of</span>
+              <span className="">{consensusNumber.requiredConsensus}</span>
+              <span className="px-1">agreed on</span>
+              <span className="text-sm bg-gray-600 rounded px-2">{user.vote}</span>
+            </div>
+          }
+        </div>
+        <div className="flex flex-col">
+          {
+            user && <div>
+              <div className="bg-gray-700 flex flex-row p-2 mt-2">
+                <h2 className="text-lg px-2 rounded bg-gray-600">{user.name}</h2>
+                <h2 className="text-sm px-2">is voting for</h2>
+                {
+                  !location.startsWith('/vote') && <div className="flex flex-row">
+                    {
+                      user.vote &&
+                      <h2 className="text-lg px-2 rounded bg-gray-600">{user.vote}</h2>
+                    }
+                    {
+                      (!user.vote || user.vote.length == 0) &&
+                      <div className="w-24 bg-gray-600 rounded"></div>
+                    }
+                    {
+                      !user.hasVoted &&
+                      <Link className="underline text-xl ml-2" href="/vote">Choose</Link>
+                    }
+                    {
+                      user.hasVoted &&
+                      <Link className="underline text-sm ml-2" href="/vote">Change</Link>
+                    }
+                  </div>
+                }
+                {
+                  location.startsWith('/vote') && voteOptions && <div>
+                    <Select default={user.vote} options={voteOptions.map(v => v.name)} href="/vote" />
+                    <Link className="underline text-sm ml-2" href="/">Cancel</Link>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          {
+            fractalVoters && fractalVoters.map((voter: any) => <div>
+              <div className="bg-gray-700 flex flex-row p-2 mt-2">
+                <h2 className="text-lg px-2 rounded bg-gray-600">{voter.name}</h2>
+                <h2 className="text-sm px-2">is voting for</h2>
+                {
+                  voter.vote && <h2 className="text-lg px-2 rounded bg-gray-600">{voter.vote}</h2>
+                }
+                {
+                  !voter.vote && <div className="w-24 rounded bg-gray-600"></div>
+                }
+              </div>
+            </div>)
+          }
+        </div>
       </div>
     }
-    <h2 className="text-4xl">{user ? user.accountName : "Loading.."}</h2>
-    {/* {
-      location.startsWith('/fractals') && <FractalsPage />
-    }
-    {
-      location.startsWith('/test') && <TestPage />
-    }
-    {
-      location.startsWith('/connect') && <ConnectPage />
-    }
-    {
-      location.startsWith('/dashboard') && <DashboardPage />
-    } */}
+    <div className="flex flex-row mt-2">
+      <h2 className="text-xl">Ranking</h2>
+      {
+        fractalRanking && fractalVoters && fractalRanking.length < fractalVoters.length &&
+          <div className="text-sm ml-2">
+            <span>next to be ranked</span>
+            <span className="mx-2 px-2 rounded bg-gray-600">
+              {
+                fractalRanking.length > 0 ?
+                  numberToWord(fractalRanking[fractalRanking.length - 1].ranking - 1) :
+                  numberToWord(config.highestRanking)
+              }              
+            </span>
+          </div>
+      }
+      {
+        fractalRanking && fractalVoters && fractalRanking.length == fractalVoters.length &&
+          <h2 className="text-sm ml-2">completed</h2>
+      }
+      {
+        !location.startsWith('/vote') && user && consensusNumber &&
+          consensusNumber.consensusReached >= consensusNumber.requiredConsensus &&
+            config.defaultRoom != user.room &&
+              <Link className="underline text-xl ml-2" href="/confirm">Confirm</Link>
+      }
+    </div>
+    <div className="flex-flex col">
+      {fractalRanking && fractalRanking.map((r: any) => <div className="flex flex-row p-2 mt-2 bg-gray-700">
+        <h2 className="text-lg px-2 rounded bg-gray-600">{r.name}</h2>
+        <h2 className="text-base mx-2">ranked as</h2>
+        <h2 className="text-lg px-2 rounded bg-gray-600">{numberToWord(r.ranking)}</h2>
+        {
+          r.ranking == config.highestRanking &&
+          <h2 className="text-sm mx-2">(highest)</h2>
+        }
+      </div>)}
+    </div>
   </div>
 }
 
