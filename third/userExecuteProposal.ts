@@ -27,6 +27,8 @@ export default mutation(async (pussy, authSignature: string) => {
     const galaxies = await pussy.db.table("galaxies").collect();
 
     for (const account of accounts) {
+        if (!account || !account.name) continue;
+
         let alreadyChosen = false;
 
         for (const galaxy of galaxies) {

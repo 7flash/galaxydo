@@ -22,6 +22,12 @@ export default mutation(async (pussy, newName: string, signature: string) => {
         });
     }
 
+    // using account name as identifier.. instead of ip address.. perform authorization once account name entered..
+    // but check this account name not used yet.. otherwise show an error.. name already taken..
+    // the same with rooms..
+
+    // check existing account name - not allow to use the one already in use recently..
+
     // all existing proposals showing new name (because its dinamically fetched)
 
     // only allow to choose another user name from popup

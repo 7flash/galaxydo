@@ -3,9 +3,12 @@ import { Link, useLocation } from "wouter-preact";
 import { useQuery, useMutation } from "@convex/_generated";
 import useBus, { dispatch } from "use-bus";
 import Input from "@src/shared/Input";
+import AccountRow from "./accountRow";
+import RoomRow from "./roomRow";
 
 export default function Account() {
     const [location, setLocation] = useLocation();
+    const [fractalName, setFractalName] = useState(null);
     const [accountName, setAccountName] = useState(null);
     const [accountAddress, setAccountAddress] = useState(null);
     const [accountSignature, setAccountSignature] = useState(null);
@@ -40,30 +43,18 @@ export default function Account() {
         setAccountSignature(account.signature);
     }, []);
 
-    return <div>
-        <div className="flex flex-row">
-            <h2 className="text-xl px-2">Account</h2>
-            <Link className="underline text-sm" href={`/dashboard/signOut`}>Logout</Link>
+    return <div className="flex flex-col">
+        <div className="flex flex-row mb-2">
+            <h2 className="text-xl px-2">Fractal Genesis, May 21th</h2>
+            {/* <Link className="underline text-sm" href={`/dashboard/signOut`}>Logout</Link> */}
         </div>
-        <div className="bg-gray-700 p-2 my-2 flex flex-row">
+        {/* <div className="bg-gray-700 p-2 my-2 flex flex-row">
             <h2 className="mx-2 px-2">Address</h2>
             <div className="mx-2 px-2 bg-gray-600">
                 <h2 className="">{accountAddress || <div className="w-72" />}</h2>
             </div>
-        </div>
-        <div className="flex flex-row justify-start max-w-sm bg-gray-700 p-2">
-            <h2 className="mx-2 px-2">Name</h2>
-            <div className="mx-2 px-2 bg-gray-600">
-                {
-                    isEditing ? <Input value={accountName} onChange={setAccountName} onSubmit={() => {
-                        updateAccountName(accountName, accountSignature);
-                        setLocation("/dashboard");
-                    }} /> : <h2 className="">{accountName || <div className="w-28" />}</h2>
-                }
-            </div>
-            {
-                !isEditing && <Link className="underline" href={`/dashboard/editAccountName`}>Edit</Link>
-            }
-        </div>
+        </div> */}
+        <AccountRow />
+        <RoomRow />
     </div>
 }  
