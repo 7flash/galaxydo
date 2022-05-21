@@ -1,7 +1,7 @@
 const config = {
     fractalName: 'Fractal Genesis',
-    fractalPrefix: 'May 21st.. ',
-    defaultRoom: 'General Room..',
+    fractalPrefix: 'May 21st ',
+    defaultRoom: 'General Room',
     roomsTableName: 'rooms21',
     usersTableName: 'users21',
     numberOfRooms: 5,

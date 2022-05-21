@@ -1,5 +1,6 @@
 import { query } from "convex-dev/server";
 import { Id } from "convex-dev/values";
+import config from "./config";
 
 export default query(async ({ db }, userId: string) => {
     if (!userId) return null;
@@ -10,7 +11,7 @@ export default query(async ({ db }, userId: string) => {
         throw new Error("User not found");
     }
 
-    const rankedUsers = await db.table('users').filter(
+    const rankedUsers = await db.table(config.usersTableName).filter(
         (q) => q.and(
             q.eq(q.field('room'), account.room),
             q.gt(q.field('ranking'), 0)

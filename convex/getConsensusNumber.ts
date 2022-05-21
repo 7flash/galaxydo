@@ -14,7 +14,7 @@ export default query(async ({ db }, userId: string) => {
     let consensusReached = 0;
 
     if (account.vote && account.vote.length > 0) {
-        const consensusUsers = await db.table('users').filter(
+        const consensusUsers = await db.table(config.usersTableName).filter(
             (q) => q.and(
                 q.eq(q.field('vote'), account.vote),
             )

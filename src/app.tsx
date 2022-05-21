@@ -7,17 +7,11 @@ import Input from './shared/Input';
 import Select from './shared/Select';
 import { numberToWord } from './shared/helpers';
 
-export function App() {
+function MainApp() {
   const [location, setLocation] = useLocation();
 
-  const [error, resetError] = useErrorBoundary(
-    (error) => {
-      console.error(error)
-      setLocation("/");
-    }
-  );
-
   const [userId, setUserId] = useState("");
+  const [isCompleted, setIsCompleted] = useState(false);
 
   const user = useQuery('getUser', userId);
   const fractalRooms = useQuery('getFractalRooms', userId);
@@ -30,6 +24,18 @@ export function App() {
   const userSaveRoom = useMutation("userSaveRoom");
   const userSaveVote = useMutation("userSaveVote");
   const userConfirmVote = useMutation("userConfirmVote");
+
+  useEffect(() => {
+    // (fractalVoters.length + 1) || fractalRanking.length
+    if (fractalRanking &&
+      fractalRanking.length > 0 &&
+      (fractalRanking.length == config.highestRanking)
+    ) {
+      setIsCompleted(true);
+    } else {
+      setIsCompleted(false);
+    }
+  }, [fractalRanking]);
 
   useEffect(() => {
     if (window.localStorage.getItem('userId')) {
@@ -139,7 +145,7 @@ export function App() {
       }
     </div>
     {
-      (!(fractalRanking && fractalVoters && fractalRanking.length == fractalVoters.length)) &&
+      !isCompleted &&
       <div>
         <div className="flex flex-row mt-2">
           <h2 className="text-xl">Consensus</h2>
@@ -147,7 +153,7 @@ export function App() {
             user && consensusNumber && <div className="flex flex-row text-sm ml-2">
               <span className="">{consensusNumber.consensusReached}</span>
               <span className="px-1">of</span>
-              <span className="">{consensusNumber.requiredConsensus}</span>
+              <span className="">{config.highestRanking}</span>
               <span className="px-1">agreed on</span>
               <span className="text-sm bg-gray-600 rounded px-2">{user.vote}</span>
             </div>
@@ -208,27 +214,28 @@ export function App() {
     <div className="flex flex-row mt-2">
       <h2 className="text-xl">Ranking</h2>
       {
-        fractalRanking && fractalVoters && fractalRanking.length < fractalVoters.length &&
-          <div className="text-sm ml-2">
-            <span>next to be ranked</span>
-            <span className="mx-2 px-2 rounded bg-gray-600">
-              {
-                fractalRanking.length > 0 ?
-                  numberToWord(fractalRanking[fractalRanking.length - 1].ranking - 1) :
-                  numberToWord(config.highestRanking)
-              }              
-            </span>
-          </div>
+        !isCompleted &&
+        <div className="text-sm ml-2">
+          <span>next to be ranked</span>
+          <span className="mx-2 px-2 rounded bg-gray-600">
+            {
+              fractalRanking && fractalRanking.length > 0 ?
+                numberToWord(fractalRanking[fractalRanking.length - 1].ranking - 1) :
+                numberToWord(config.highestRanking)
+            }
+          </span>
+        </div>
       }
       {
-        fractalRanking && fractalVoters && fractalRanking.length == fractalVoters.length &&
-          <h2 className="text-sm ml-2">completed</h2>
+        isCompleted &&
+        <Link href={`/view/${user.room}`} className="text-sm ml-2 underline">Share</Link>
       }
       {
-        !location.startsWith('/vote') && user && consensusNumber &&
-          consensusNumber.consensusReached >= consensusNumber.requiredConsensus &&
-            config.defaultRoom != user.room &&
-              <Link className="underline text-xl ml-2" href="/confirm">Confirm</Link>
+        !location.startsWith('/vote') && !isCompleted &&
+        consensusNumber && consensusNumber.consensusReached >= consensusNumber.requiredConsensus &&
+        user && config.defaultRoom != user.room &&
+        fractalVoters && fractalVoters.length >= config.highestRanking-1 &&
+        <Link className="underline text-xl ml-2" href="/confirm">Confirm</Link>
       }
     </div>
     <div className="flex-flex col">
@@ -245,13 +252,67 @@ export function App() {
   </div>
 }
 
-// one user cannot be in multiple rooms and make proposals there..
-// when moving to another room move also his proposal..
-// get rid of proposals table..
-// just in accounts table.. you choose your room.. and choose who you vote for..
-// if who you vote for moves to another room.. also reset yours..
-// if one is chosen.. reset everyone vote to himself..
-// can we get rid of ranking table..
-// just assign ranking in accounts table..
-// once ranking is assigned.. cannot be voted for..
-// cannot move to another room.. not changing his room anymore in table..
+function ViewOnlyApp({ roomName }: { roomName: string }) {
+  const room = useQuery('getViewRoom', decodeURIComponent(roomName));
+
+  return <div className="flex flex-col h-full font-mono text-white p-4">
+    <div className="flex flex-row">
+      <h2 className="text-xl">{config.fractalName}</h2>
+      {
+        room && room.name && <div className="text-sm ml-2">
+          {room.name}
+        </div>
+      }
+    </div>
+    <div className="flex flex-row mt-2">
+      <h2 className="text-xl">Ranking</h2>
+      {
+        room && room.ranking && <div className="text-sm ml-2">
+          <span>completed</span>
+          <span className="mx-2 px-2">
+            of {room.ranking.length} members
+          </span>
+        </div>
+      }
+    </div>
+    <div className="flex-flex col">
+      {room && room.ranking.map((r: string, i: number) => <div className="flex flex-row p-2 mt-2 bg-gray-700">
+        <h2 className="text-lg px-2 rounded bg-gray-600">{r}</h2>
+        <h2 className="text-base mx-2">ranked as</h2>
+        <h2 className="text-lg px-2 rounded bg-gray-600">{numberToWord(config.highestRanking-i)}</h2>
+        {
+          i == 0 &&
+          <h2 className="text-sm mx-2">(highest)</h2>
+        }
+      </div>)}
+    </div>
+  </div>
+}
+
+export function App() {
+  const [location, setLocation] = useLocation();
+  const [viewRoomName, setViewRoomName] = useState('');
+
+  const [error, resetError] = useErrorBoundary(
+    (error) => {
+      console.error(error)
+      // setLocation("/");
+    }
+  );
+
+  useEffect(() => {
+    if (location.startsWith('/view')) {
+      const param = location.split('/')[2];
+      setViewRoomName(param);
+    } else {
+      setViewRoomName('');
+    }
+  }, [location]);
+
+  return <div>
+    {error && <div className="text-white"><h2>{error.toString()}</h2><hr /></div>}
+    {
+      viewRoomName ? <ViewOnlyApp roomName={viewRoomName} /> : <MainApp />
+    }
+  </div>
+}

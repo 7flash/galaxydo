@@ -6,20 +6,21 @@ export default mutation(async ({ db }, userId: string, userName: string) => {
     let verifiedUserName = '';
 
     let counter = 0;
+    const originalUserName = userName;
     while (!verifiedUserName) {
-        const existingName = await db.table("users").filter(
+        const existingName = await db.table(config.usersTableName).filter(
             (q) => q.eq(q.field("name"), userName)
         ).first();
         
         if (existingName) {
-            userName = `${userName} (${++counter})`;
+            userName = `${originalUserName} (${++counter})`;
         } else {
             verifiedUserName = userName;
         }
     }
     
     if (!userId || userId.length == 0) {
-        return db.insert('users', {
+        return db.insert(config.usersTableName, {
             name: verifiedUserName,
             room: config.defaultRoom,
             vote: verifiedUserName,            

@@ -8,6 +8,7 @@ import type getFractalRanking from "./getFractalRanking";
 import type getFractalRooms from "./getFractalRooms";
 import type getFractalVoters from "./getFractalVoters";
 import type getUser from "./getUser";
+import type getViewRoom from "./getViewRoom";
 import type getVoteOptions from "./getVoteOptions";
 import type userConfirmVote from "./userConfirmVote";
 import type userSaveAccount from "./userSaveAccount";
@@ -48,6 +49,7 @@ export type ConvexAPI = {
     getFractalRooms: ClientQuery<typeof getFractalRooms>;
     getFractalVoters: ClientQuery<typeof getFractalVoters>;
     getUser: ClientQuery<typeof getUser>;
+    getViewRoom: ClientQuery<typeof getViewRoom>;
     getVoteOptions: ClientQuery<typeof getVoteOptions>;
   };
   mutations: {
