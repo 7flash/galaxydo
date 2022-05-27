@@ -24,4 +24,4 @@ curl localhost:3000/api/setupRooms
 
 ## Demo
 
-![https://github.com/7flash/galaxydo/blob/master/demo.gif]
+![demo](https://github.com/7flash/galaxydo/blob/master/demo.gif)
