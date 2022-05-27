@@ -17,14 +17,25 @@ export default query(async ({ db }, userId: string) => {
         const consensusUsers = await db.table(config.usersTableName).filter(
             (q) => q.and(
                 q.eq(q.field('vote'), account.vote),
+                q.eq(q.field('room'), account.room),
             )
         ).collect();
         
         consensusReached = consensusUsers.length;
     }
 
+    const totalUsers = await db.table(config.usersTableName).filter(
+        (q) => q.eq(q.field('room'), account.room),
+    ).collect();
+
+    let requiredConsensus = config.requiredConsensus;
+
+    if (totalUsers.length == 5) {
+        requiredConsensus -= 1;
+    }
+
     return {
         consensusReached: consensusReached,
-        requiredConsensus: config.requiredConsensus,
+        requiredConsensus: requiredConsensus,
     }
 });

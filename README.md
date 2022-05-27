@@ -1,8 +1,10 @@
 ## Galaxy.Do
 
-Fractal Governance Tool
+Galaxy Decentralized Organization
 
 ## Setup
+
+1) Start dev environment
 
 ```
 git clone git@github.com:7flash/galaxydo.git
@@ -10,4 +12,16 @@ pnpm i
 npm run start
 ```
 
-Edit [config.ts](/convex/config.ts)
+2) Setup configuration
+
+[config.ts](/convex/config.ts)
+
+3) Create voting rooms
+
+```
+curl localhost:3000/api/setupRooms
+```
+
+## Demo
+
+![/demo.gif]

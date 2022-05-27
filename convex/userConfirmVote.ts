@@ -14,7 +14,17 @@ export default mutation(async ({ db }, userId: string) => {
         )
     ).collect();
 
-    if (consensusUsers.length >= config.requiredConsensus) {
+    const totalUsers = await db.table(config.usersTableName).filter(
+        (q) => q.eq(q.field('room'), account.room),
+    ).collect();
+
+    let requiredConsensus = config.requiredConsensus;
+
+    if (totalUsers.length == 5) {
+        requiredConsensus -= 1;
+    }
+
+    if (consensusUsers.length >=requiredConsensus) {
         const delegate = await db.table(config.usersTableName).filter(
             (q) => q.and(
                 q.eq(q.field('room'), account.room),
@@ -22,7 +32,7 @@ export default mutation(async ({ db }, userId: string) => {
             ),
         ).unique();
 
-        let delegateRanking = config.highestRanking;
+        let delegateRanking = config.maxRanking;
 
         {
             const rankedUsers = await db.table(config.usersTableName).filter(
@@ -83,16 +93,22 @@ export default mutation(async ({ db }, userId: string) => {
                     ranking: [''],
                 };
 
-                if (delegateRanking == 1) {
+                let rankingCompleted = false;
+
+                const rankedUsers = await db.table(config.usersTableName).filter(
+                    (q) => q.and(
+                        q.eq(q.field('room'), account.room),
+                        q.gt(q.field('ranking'), 0),
+                    ),
+                ).collect();
+
+                if (totalUsers.length == rankedUsers.length) {
+                    rankingCompleted = true;
+                }
+
+                if (rankingCompleted) {
                     roomData.completed = true;
 
-                    const rankedUsers = await db.table(config.usersTableName).filter(
-                        (q) => q.and(
-                            q.eq(q.field('room'), account.room),
-                            q.gt(q.field('ranking'), 0),
-                        ),
-                    ).collect();
-        
                     const rankedUsersNames = rankedUsers.sort((a, b) => {
                             if (a.ranking > b.ranking) return -1;
                             if (a.ranking < b.ranking) return 1;

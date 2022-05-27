@@ -29,13 +29,14 @@ function MainApp() {
     // (fractalVoters.length + 1) || fractalRanking.length
     if (fractalRanking &&
       fractalRanking.length > 0 &&
-      (fractalRanking.length == config.highestRanking)
+      consensusNumber &&
+      (fractalRanking.length >= consensusNumber.requiredConsensus+1)
     ) {
       setIsCompleted(true);
     } else {
       setIsCompleted(false);
     }
-  }, [fractalRanking]);
+  }, [fractalRanking, consensusNumber]);
 
   useEffect(() => {
     if (window.localStorage.getItem('userId')) {
@@ -99,7 +100,6 @@ function MainApp() {
         !location.startsWith('/account') && user != null && <div className="flex flex-row">
           <div className="mx-4 bg-gray-600 px-2 text-lg rounded">{user.name}</div>
           {
-            !user.hasConfirmed &&
             <Link className="underline text-sm" href="/account">Edit</Link>
           }
         </div>
@@ -153,7 +153,7 @@ function MainApp() {
             user && consensusNumber && <div className="flex flex-row text-sm ml-2">
               <span className="">{consensusNumber.consensusReached}</span>
               <span className="px-1">of</span>
-              <span className="">{config.highestRanking}</span>
+              <span className="">{consensusNumber.requiredConsensus}</span>
               <span className="px-1">agreed on</span>
               <span className="text-sm bg-gray-600 rounded px-2">{user.vote}</span>
             </div>
@@ -221,7 +221,7 @@ function MainApp() {
             {
               fractalRanking && fractalRanking.length > 0 ?
                 numberToWord(fractalRanking[fractalRanking.length - 1].ranking - 1) :
-                numberToWord(config.highestRanking)
+                numberToWord(config.maxRanking)
             }
           </span>
         </div>
@@ -234,7 +234,7 @@ function MainApp() {
         !location.startsWith('/vote') && !isCompleted &&
         consensusNumber && consensusNumber.consensusReached >= consensusNumber.requiredConsensus &&
         user && config.defaultRoom != user.room &&
-        fractalVoters && fractalVoters.length >= config.highestRanking-1 &&
+        fractalVoters && fractalVoters.length >= consensusNumber.requiredConsensus &&
         <Link className="underline text-xl ml-2" href="/confirm">Confirm</Link>
       }
     </div>
@@ -244,7 +244,7 @@ function MainApp() {
         <h2 className="text-base mx-2">ranked as</h2>
         <h2 className="text-lg px-2 rounded bg-gray-600">{numberToWord(r.ranking)}</h2>
         {
-          r.ranking == config.highestRanking &&
+          r.ranking == config.maxRanking &&
           <h2 className="text-sm mx-2">(highest)</h2>
         }
       </div>)}
@@ -269,9 +269,6 @@ function ViewOnlyApp({ roomName }: { roomName: string }) {
       {
         room && room.ranking && <div className="text-sm ml-2">
           <span>completed</span>
-          <span className="mx-2 px-2">
-            of {room.ranking.length} members
-          </span>
         </div>
       }
     </div>
@@ -279,7 +276,7 @@ function ViewOnlyApp({ roomName }: { roomName: string }) {
       {room && room.ranking.map((r: string, i: number) => <div className="flex flex-row p-2 mt-2 bg-gray-700">
         <h2 className="text-lg px-2 rounded bg-gray-600">{r}</h2>
         <h2 className="text-base mx-2">ranked as</h2>
-        <h2 className="text-lg px-2 rounded bg-gray-600">{numberToWord(config.highestRanking-i)}</h2>
+        <h2 className="text-lg px-2 rounded bg-gray-600">{numberToWord(config.maxRanking-i)}</h2>
         {
           i == 0 &&
           <h2 className="text-sm mx-2">(highest)</h2>
