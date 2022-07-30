@@ -8,7 +8,7 @@ Galaxy Decentralized Organization
 
 ```
 git clone git@github.com:7flash/galaxydo.git
-pnpm i
+pnpm i 
 npm run start
 ```
 

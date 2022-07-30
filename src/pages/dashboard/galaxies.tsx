@@ -100,6 +100,13 @@ export default function Galaxies() {
                 <h2 className="text-xl px-2">{decodeURI(viewingUniverseGalaxies.name)}</h2>
                 <Link className="ml-2 text-sm underline" href="/dashboard">view current</Link>
             </div>
+
+            {
+                viewingUniverseGalaxies && viewingUniverseGalaxies.galaxies && <span>
+                    { viewingUniverseGalaxies.join(',') }
+                </span>
+            }
+
             <div className="flex flex-col">
                 {
                     viewingUniverseGalaxies && viewingUniverseGalaxies.galaxies && viewingUniverseGalaxies.galaxies.map((galaxy: any, i) => {

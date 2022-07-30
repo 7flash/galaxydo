@@ -272,6 +272,11 @@ function ViewOnlyApp({ roomName }: { roomName: string }) {
         </div>
       }
     </div>
+    
+    <span className="text-xl">
+      {room && room.ranking && room.ranking.join(',') }
+    </span>
+
     <div className="flex-flex col">
       {room && room.ranking.map((r: string, i: number) => <div className="flex flex-row p-2 mt-2 bg-gray-700">
         <h2 className="text-lg px-2 rounded bg-gray-600">{r}</h2>

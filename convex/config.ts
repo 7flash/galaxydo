@@ -1,9 +1,9 @@
 const config = {
     fractalName: 'Fractal Genesis',
-    fractalPrefix: 'May 28st ',
+    fractalPrefix: 'June 18 ',
     defaultRoom: 'Shared Room',
-    roomsTableName: 'rooms28',
-    usersTableName: 'users28',
+    roomsTableName: 'roomsbase',
+    usersTableName: 'usersbase',
     numberOfRooms: 8,
     requiredConsensus: 5,
     highestRanking: 6,
