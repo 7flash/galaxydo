@@ -268,13 +268,13 @@ function ViewOnlyApp({ roomName }: { roomName: string }) {
       <h2 className="text-xl">Ranking</h2>
       {
         room && room.ranking && <div className="text-sm ml-2">
-          <span>completed</span>
+          <span>consensus reached</span>
         </div>
       }
     </div>
-    
+
     <span className="text-xl">
-      {room && room.ranking && room.ranking.join(',') }
+      {room && room.ranking && room.ranking.map((name: string) => name.startsWith('@') ? name : `@${name}`).join(', ') }
     </span>
 
     <div className="flex-flex col">
