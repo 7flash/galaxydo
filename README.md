@@ -2,6 +2,14 @@
 
 Galaxy Decentralized Organization
 
+## Demo
+
+![demo](https://github.com/7flash/galaxydo/blob/master/demo.gif)
+
+## Architecture
+
+![image](https://user-images.githubusercontent.com/4569866/183359783-0f210f6d-d36c-4177-9290-8ed006e0408c.png)
+
 ## Setup
 
 1) Start dev environment
@@ -21,7 +29,3 @@ npm run start
 ```
 curl localhost:3000/api/setupRooms
 ```
-
-## Demo
-
-![demo](https://github.com/7flash/galaxydo/blob/master/demo.gif)
